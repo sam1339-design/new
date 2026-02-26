@@ -63,7 +63,14 @@ def fetch_news(urls: Iterable[str], seen_ids: Set[str]) -> list[dict]:
     fresh_items: list[dict] = []
 
     for url in urls:
-        for entry in parse_rss(url):
+        try:
+            entries = parse_rss(url)
+        except Exception as exc:
+            now = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"[{now}] 来源抓取失败: {url} ({exc})")
+            continue
+
+        for entry in entries:
             entry_id = entry["id"]
             if not entry_id or entry_id in seen_ids:
                 continue
