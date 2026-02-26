@@ -67,7 +67,7 @@ def fetch_news(urls: Iterable[str], seen_ids: Set[str]) -> list[dict]:
             entries = parse_rss(url)
         except Exception as exc:
             now = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"[{now}] 来源抓取失败: {url} ({exc})")
+            print(f"[{now}] 来源抓取失败: {url} ({type(exc).__name__}: {exc})")
             continue
 
         for entry in entries:
@@ -94,22 +94,19 @@ def monitor_news(urls: list[str], interval_sec: int, run_hours: int) -> None:
 
     while dt.datetime.now() < end_time:
         now = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        try:
-            new_items = fetch_news(urls, seen_ids)
-            if new_items:
-                for item in new_items:
-                    msg = (
-                        f"[{now}] 新财经消息\n"
-                        f"标题: {item['title']}\n"
-                        f"时间: {item['published']}\n"
-                        f"链接: {item['link']}\n"
-                    )
-                    print(msg)
-                    try_notify("新财经消息", item["title"])
-            else:
-                print(f"[{now}] 暂无新消息")
-        except Exception as exc:
-            print(f"[{now}] 抓取失败: {exc}")
+        new_items = fetch_news(urls, seen_ids)
+        if new_items:
+            for item in new_items:
+                msg = (
+                    f"[{now}] 新财经消息\n"
+                    f"标题: {item['title']}\n"
+                    f"时间: {item['published']}\n"
+                    f"链接: {item['link']}\n"
+                )
+                print(msg)
+                try_notify("新财经消息", item["title"])
+        else:
+            print(f"[{now}] 暂无新消息")
 
         time.sleep(interval_sec)
 
